@@ -31,3 +31,9 @@ export interface BooleanValue extends RuntimeValue {
 export function MK_BOOL(bool = true) {
     return { type: "boolean", value: bool } as BooleanValue;
 }
+
+
+export interface ConsoleValue extends RuntimeValue {
+    type: "null",
+    value: null
+}

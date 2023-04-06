@@ -1,8 +1,7 @@
-import { Expression, Identifier, Program, Statement, NumericalLiteral, BinaryExpression } from "./ast.ts";
+import { Expression, Identifier, Program, Statement, NumericalLiteral, BinaryExpression, VariableDeclartion, AssignmentExpression } from "./ast.ts";
 import { TokenType } from "../lexer/tokenType.ts";
 import { Token } from "../lexer/token.ts";
 import Lexer from "../lexer/lexer.ts";
-import UnexpectedToken from '../core/exceptions/unexpectedToken.ts';
 
 import { isBinaryOperator } from "../core/helpers/helper.ts";
 
@@ -22,7 +21,7 @@ export default class Parser {
     private expetedToken(tokenType: TokenType): Token {
         const prevToken = this.tokenNext() as Token;
         if (!prevToken || prevToken.type != tokenType) {
-            throw new UnexpectedToken("Unexpected token found during parsing! ", tokenType)
+            throw `${tokenType} not found during parsing! `
         }
 
         return prevToken;
@@ -33,20 +32,40 @@ export default class Parser {
     }
 
     private parseStatement(): Statement {
-        return this.parseExpression()
+
+        switch (this.tokenAt().type) {
+            case TokenType.Let:
+            case TokenType.Const:
+                return this.parseVariableDeclaration();
+            default:
+                return this.parseExpression()
+        }
     }
 
     private parseExpression(): Expression {
-        return this.parceAdditiveExpression();
-        //return this.parsePrimaryExpression();
+        return this.parseAssigmentExpression();
     }
 
-    private parceAdditiveExpression(): Expression {
-        let left = this.parceMuliplitiveExpression();
+    private parseAssigmentExpression(): Expression {
+        const left = this.parseAdditiveExpression();
+        if (this.tokenAt().type == TokenType.Equals) {
+            this.tokenNext();
+            const value = this.parseAssigmentExpression();
+
+            this.expetedToken(TokenType.Semicolon);
+
+            return { kind: "AssignmentExpression", value: value, assigne: left } as AssignmentExpression;
+        }
+
+        return left;
+    }
+
+    private parseAdditiveExpression(): Expression {
+        let left = this.parseMuliplitiveExpression();
 
         while (isBinaryOperator(this.tokenAt().value)) {
             const operator = this.tokenNext().value;
-            const right = this.parceMuliplitiveExpression();
+            const right = this.parseMuliplitiveExpression();
             left = {
                 kind: "BinaryExpression",
                 left: left,
@@ -58,7 +77,7 @@ export default class Parser {
         return left;
     }
 
-    private parceMuliplitiveExpression(): Expression {
+    private parseMuliplitiveExpression(): Expression {
         let left = this.parsePrimaryExpression();
 
         while (isBinaryOperator(this.tokenAt().value)) {
@@ -94,9 +113,37 @@ export default class Parser {
             }
 
             default:
-                throw new UnexpectedToken("Unexpected token found during parsing!");
+                throw `Unexpected token found ${tokenType} during parsing!`;
 
         }
+    }
+
+
+    private parseVariableDeclaration(): Statement {
+        const isConstant = this.tokenNext().type == TokenType.Const;
+        const identifier = this.expetedToken(TokenType.Identifier).value;
+
+        if (this.tokenAt().type == TokenType.Semicolon) {
+            this.tokenNext()
+
+            if (isConstant) {
+                throw "const expreesin No value provide";
+            }
+
+            return { kind: "VariableDeclartion", identifier: identifier, constant: false } as VariableDeclartion;
+        }
+
+        this.expetedToken(TokenType.Equals);
+
+        const decleration = {
+            kind: "VariableDeclartion",
+            constant: isConstant,
+            identifier: identifier,
+            value: this.parseExpression()
+        } as VariableDeclartion;
+
+        this.expetedToken(TokenType.Semicolon);
+        return decleration;
     }
 
 

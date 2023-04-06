@@ -10,8 +10,25 @@ export interface Program extends Statement {
     body: Array<Statement>;
 }
 
+
+export interface VariableDeclartion extends Statement {
+    kind: "VariableDeclartion";
+    constant: boolean;
+    identifier: string;
+    value?: Expression;
+}
+
+
 /** Every Statement has a Expression */
-export interface Expression extends Statement { }
+export interface Expression extends Statement {
+    
+ }
+
+export interface AssignmentExpression extends Expression { 
+    kind:"AssignmentExpression",
+    assigne:Expression;
+    value:Expression;
+}
 
 /** BinaryExpression has a 3 type of value leftside operator Rightside [1 + 1] */
 export interface BinaryExpression extends Expression {

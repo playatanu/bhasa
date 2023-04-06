@@ -1,1 +1,3 @@
-name
+const x = 10; 
+
+dhori y = x + 22;

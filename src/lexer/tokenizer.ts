@@ -1,11 +1,9 @@
 import { TokenType } from "./tokenType.ts";
-import UnsupportedToken from "../core/exceptions/unsupportedToken.ts";
 import { Token } from "./token.ts";
-import { isAlphabet, isBinaryOperator, isBrackets, isInteger, isSkippable, isSymbol } from "../core/helpers/helper.ts";
 
-const KEYWORDS: Record<string, TokenType> = {
-  let: TokenType.Let,
-};
+import { isAlphabet, isBinaryOperator, isBrackets, isInteger, isSkippable, isSymbol } from "../helpers/helper.ts";
+
+import KEYWORDS from "./keywords.ts";
 
 export default class Tokenizer {
 
@@ -72,7 +70,7 @@ export default class Tokenizer {
         }
 
         else {
-          throw new UnsupportedToken("Unreconized character found in source code during tokenize! ", src[0]);
+          throw `Unreconized character "${src[0]}" found in source code during tokenize!`;
         }
 
       }
