@@ -1,4 +1,4 @@
-import { Expression, Identifier, Program, Statement, NumericalLiteral, BinaryExpression, NullLiteral } from "./ast.ts";
+import { Expression, Identifier, Program, Statement, NumericalLiteral, BinaryExpression } from "./ast.ts";
 import { TokenType } from "../lexer/tokenType.ts";
 import { Token } from "../lexer/token.ts";
 import Lexer from "../lexer/lexer.ts";
@@ -82,10 +82,6 @@ export default class Parser {
         switch (tokenType) {
             case TokenType.Identifier:
                 return { kind: "Identifier", symbol: this.tokenNext().value } as Identifier;
-
-            case TokenType.Null:
-                this.tokenNext();
-                return { kind: "NullLiteral", value: "null" } as NullLiteral;
 
             case TokenType.Number:
                 return { kind: "NumericalLiteral", value: parseFloat(this.tokenNext().value) } as NumericalLiteral;

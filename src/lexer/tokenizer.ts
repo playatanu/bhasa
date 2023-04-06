@@ -5,7 +5,6 @@ import { isAlphabet, isBinaryOperator, isBrackets, isInteger, isSkippable, isSym
 
 const KEYWORDS: Record<string, TokenType> = {
   let: TokenType.Let,
-  null: TokenType.Null
 };
 
 export default class Tokenizer {

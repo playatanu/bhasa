@@ -1,30 +1,36 @@
-import { RuntimeValue, NumberValue, NullValue } from './values.ts';
-import { BinaryExpression, NumericalLiteral, Program, Statement } from '../parser/ast.ts';
+import { RuntimeValue, NumberValue, MK_NULL } from './values.ts';
+import { BinaryExpression, Identifier, NumericalLiteral, Program, Statement } from '../parser/ast.ts';
 import UnsupportedAst from '../core/exceptions/unsupportedAst.ts';
+import Environment from './environment.ts';
 
 export default class Interpeter {
 
-    private evaluateProgram(program: Program): RuntimeValue {
-        let lastEvaluated: RuntimeValue = { type: "null", value: "null" } as NullValue;
+    private evaluateProgram(program: Program, env: Environment): RuntimeValue {
+        let lastEvaluated: RuntimeValue = MK_NULL();
 
         for (const statement of program.body) {
-            lastEvaluated = this.evaluate(statement);
+            lastEvaluated = this.evaluate(statement, env);
         }
 
         return lastEvaluated;
     }
 
-    private evaluateBinaryExpression(binaryExpression: BinaryExpression): RuntimeValue {
+    private evaluateIdentifier(identifier: Identifier, env: Environment): RuntimeValue {
+        const valiable = env.lookupVariable(identifier.symbol);
+        return valiable;
+    }
 
-        const lhs = this.evaluate(binaryExpression.left);
-        const rhs = this.evaluate(binaryExpression.right);
+    private evaluateBinaryExpression(binaryExpression: BinaryExpression, env: Environment): RuntimeValue {
+
+        const lhs = this.evaluate(binaryExpression.left, env);
+        const rhs = this.evaluate(binaryExpression.right, env);
         const op = binaryExpression.operator;
 
         if (lhs.type == "number" && rhs.type == "number") {
             return this.evaluatemumericBinaryExpression(lhs as NumberValue, rhs as NumberValue, op as string);
         }
 
-        return { type: "null", value: "null" } as NullValue;
+        return MK_NULL();
     }
 
     private evaluatemumericBinaryExpression(lhs: NumberValue, rhs: NumberValue, operator: string): NumberValue {
@@ -55,20 +61,20 @@ export default class Interpeter {
 
 
 
-    public evaluate(astNode: Statement): RuntimeValue {
+    public evaluate(astNode: Statement, env: Environment): RuntimeValue {
 
         switch (astNode.kind) {
             case "NumericalLiteral":
                 return { value: ((astNode as NumericalLiteral).value), type: "number" } as NumberValue
 
-            case "NullLiteral":
-                return { value: "null", type: "null" } as NullValue
-
             case "Program":
-                return this.evaluateProgram(astNode as Program);
+                return this.evaluateProgram(astNode as Program, env);
+
+            case "Identifier":
+                return this.evaluateIdentifier(astNode as Identifier, env);
 
             case "BinaryExpression":
-                return this.evaluateBinaryExpression(astNode as BinaryExpression);
+                return this.evaluateBinaryExpression(astNode as BinaryExpression, env);
 
             default:
                 throw new UnsupportedAst("Unsupported Ast Found during evaluate! ", astNode.kind);

@@ -1,10 +1,8 @@
 export enum TokenType {
   Identifier = "Identifier", // varname
-  // Data Types
   String = "String", // abcd
   Number = "Number", // 1234
   Boolean = "Boolean", // true
-  Null = "Null", //null
 
   // keywords
   Let = "Let",

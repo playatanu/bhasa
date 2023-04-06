@@ -30,8 +30,3 @@ export interface NumericalLiteral extends Expression {
     kind: "NumericalLiteral";
     value: number;
 }
-
-export interface NullLiteral extends Expression {
-    kind: "NullLiteral";
-    value: "null";
-}
